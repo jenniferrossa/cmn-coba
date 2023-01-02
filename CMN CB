@@ -1,0 +1,13 @@
+import turtle 
+t=turtle.Turtle()
+turtle.Screen().bgcolor("yellow")
+
+t.pencolor("white")
+t.penup()
+t.goto(-300,0)
+t.pendown()
+t.write("cencen", font=("Arial",100,"bold"))
+
+t.penup()
+t.goto(100,50)
+t.done()
