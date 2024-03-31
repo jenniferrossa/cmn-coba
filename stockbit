@@ -1,0 +1,184 @@
+APP.JAVA------------------------------------------
+package com.ug12.aplikasistockbit;
+
+
+public class App
+{
+    public static void main( String[] args )
+    {
+        Stockbit stockbit = new Stockbit();
+        Saham saham1 = new Saham("BBRI",4330);
+        Saham saham2 = new Saham("ANTM",2530);
+        Saham saham3 = new Saham("ADRO",3150);
+        Saham saham4 = new Saham("BBCA",7375);
+        System.out.println("----------Skenario 1: Registrasi Investor----------");
+        Investor investor1 = new Investor("Albertus Adrian","albertusadrian","albertusadrian");
+        Investor investor2 = new Investor("Antonius Felix","antoniusfelix","antoniusfelix");
+        stockbit.register(investor1);
+        stockbit.register(investor2);
+        System.out.println("----------Skenario 2: Login Gagal----------");
+        stockbit.login("albertus","albertus");
+        System.out.println("----------Skenario 3: Login Berhasil (Username: albertusadrian)----------");
+        stockbit.login("albertusadrian","albertusadrian");
+        System.out.println("----------Skenario 4: Print Portfolio Client#1----------");
+        stockbit.orderBeli(saham1,2);
+        stockbit.orderBeli(saham2,3);
+        stockbit.printPortfolio();
+        System.out.println("----------Skenario 5: Print Portfolio Client#2----------");
+        stockbit.orderJual(saham2,4);
+        stockbit.orderJual(saham2,1);
+        stockbit.printPortfolio();
+        System.out.println("----------Skenario 6: Print Portfolio Client#3----------");
+        stockbit.orderJual(saham1,2);
+        stockbit.printPortfolio();
+        System.out.println("----------Skenario 7: Login Berhasil (Username: antoniusfelix)----------");
+        stockbit.login("antoniusfelix","antoniusfelix");
+        System.out.println("----------Skenario 8: Print Portfolio Client#4----------");
+        stockbit.orderBeli(saham3,2);
+        stockbit.orderBeli(saham4,1);
+        stockbit.printPortfolio();
+    }
+}
+INVESTOR----------------------------------------------
+package com.ug12.aplikasistockbit;
+import java.util.*;
+
+public class Investor {
+
+    private String username;
+        private String password;
+        private HashMap<Saham,Integer> portofolio = new HashMap<Saham,Integer>();
+        private String nama;
+
+    public Investor(String nama, String username, String password) {
+        this.nama = nama;
+        this.username = username;
+        this.password = password;
+
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public HashMap<Saham, Integer> getPortofolio() {
+        return portofolio;
+    }
+
+
+    public String getNama() {
+        return nama;
+    }
+}
+SHAM-------------------------------
+package com.ug12.aplikasistockbit;
+
+public class Saham {
+
+        private String kode;
+        private long harga;
+
+        public Saham(String kode,long harga){
+            this.harga = harga;
+            this.kode = kode;
+
+        }
+
+    public String getKode() {
+        return kode;
+    }
+
+    public long getHarga() {
+        return harga;
+    }
+}
+STOCKBIT-------------------------------------------
+package com.ug12.aplikasistockbit;
+
+
+
+import java.util.*;
+import java.util.Map.Entry;
+
+    public class Stockbit {
+        private ArrayList<Investor> arrInvestor = new ArrayList<Investor>();
+        private Investor investor;
+
+        public Stockbit() {
+
+        }
+
+        public void login(String username, String password){
+            Boolean LoginVerify = false;
+            for(Investor i : arrInvestor){
+                if (i.getUsername().equals(username) && i.getPassword().equals(password)){
+                    this.investor = i;
+                    System.out.println("Login berhasil!");
+                    LoginVerify = true;
+                    break;
+                }
+            }
+            if (!LoginVerify){
+                System.out.println("Username/password Anda salah!");
+            }
+        }
+
+
+        public void register(Investor investor){
+
+            arrInvestor.add(investor);
+            System.out.println("Registrasi akun atas nama "+investor.getNama()+" sukses!");
+
+        }
+
+
+
+        public void printPortfolio() {
+            String name = investor.getNama();
+            int count = 1;
+            long totalall = 0;
+            System.out.println("==========Portofolio Client==========");
+            System.out.println("Client: "+ name);
+            System.out.println("No.  Kode Saham \t Jumlah Lot \t Harga \t   Sub Total ");
+
+            for (Entry<Saham, Integer> i : investor.getPortofolio().entrySet()){
+
+                long total = i.getValue() * 100 * i.getKey().getHarga();
+                totalall += total;
+                System.out.println(counter + ".  " + i.getKey().getKode() + "\t         "+i.getValue() +"x"
+                        + "\t             " +i.getKey().getHarga() + "\t    " + total);
+                count ++;
+            }
+            System.out.println("Total Investasi: Rp"+totalall);
+            System.out.println("");
+        }
+
+        public void orderBeli(Saham saham, int lot) {
+
+            investor.getPortofolio().put(saham, lot);
+            System.out.println("Order beli "+saham.getKode()+" sebanyak "+lot+" lot sukses!");
+        }
+
+        public void orderJual(Saham saham, int lot) {
+            int temp = investor.getPortofolio().get(saham) - lot;
+            if(investor.getPortofolio().get(saham) > lot){
+
+            investor.getPortofolio().put(saham, temp);
+                System.out.println("Order Jual "+saham.getKode()+" sebanyak "+lot+" lot sukses!");
+            }
+            else if(investor.getPortofolio().get(saham) == lot){
+                investor.getPortofolio().put(saham, temp);
+                System.out.println("Order Jual "+saham.getKode()+" sebanyak "+lot+" lot sukses!");
+                investor.getPortofolio().remove(saham);
+
+            }
+            else{
+                System.out.println("Order Jual gagal!");
+            }
+
+        }
+    }
