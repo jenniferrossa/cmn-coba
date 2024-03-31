@@ -1,0 +1,380 @@
+import java.util.Scanner;
+
+public class Main {
+    static String namaMobil = "M_71200578";
+    static String namaPejalanKaki = "P_71200578";
+
+    static String getNamaMobil(){
+        return namaMobil;
+    }
+    static String getNamaPejalanKaki(){
+        return namaPejalanKaki;
+    }
+    public class Mobil {
+        static void jalan(){
+            System.out.println("akan jalan");
+        }
+        static void kurangiKecepatan(){
+            System.out.println("akan mengurangi kecepatan");
+        }
+        static void berhenti(){
+            System.out.println("akan berhenti");
+        }
+    }
+
+    public class PejalanKaki{
+        static void menyebrang(){
+            System.out.println("akan menyebrangi jalan");
+        }
+        static void bersiap(){
+            System.out.println("akan bersiap untuk menyeberang jalan");
+        }
+        static void menunggu(){
+            System.out.println("akan menunggu");
+        }
+    }
+    public static void main(String[] args) {
+        System.out.println("Hijau = 1");
+        System.out.println("Kuning = 2");
+        System.out.println("Merah = 3");
+        Scanner inp = new Scanner(System.in);
+        System.out.println("Kode lampu lalu lintas saat ini: ");
+        int kodeLampu = inp.nextInt();
+
+        if (kodeLampu == 1){
+            System.out.println("Mobil ");
+            getNamaMobil();
+            Mobil.jalan();
+            System.out.println(("Pejalan kaki"));
+            getNamaPejalanKaki();
+            PejalanKaki.menunggu();
+        }
+        else if (kodeLampu == 2){
+            System.out.println("Mobil ");
+            getNamaMobil();
+            Mobil.kurangiKecepatan();
+            System.out.println(("Pejalan kaki"));
+            getNamaPejalanKaki();
+            PejalanKaki.bersiap();
+        }
+        else if (kodeLampu == 3){
+            System.out.println("Mobil ");
+            getNamaMobil();
+            Mobil.berhenti();
+            System.out.println(("Pejalan kaki"));
+            getNamaPejalanKaki();
+            PejalanKaki.menyebrang();
+        }
+        else{
+            System.out.println("Kode lalu lintas tidak valid");
+        }
+
+
+
+
+    }
+}
+
+----------------------------------------------------------------------
+LOGINREGISTER------------------------------------
+APP----------------------------
+package com.ug10.loginregister;
+
+
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class App 
+{
+    public static void main( String[] args ) {
+        System.out.println( "Selamat datang di Toko Felix" );
+        System.out.println( "Silakan daftarkan diri kamu untuk dapat mengakses menu di Toko Felix" );
+
+        User user = new User("","","");
+
+        Scanner scan = new Scanner(System.in);
+        while (true) {
+            try {
+                System.out.println( "Username: " );
+                String username = scan.nextLine();
+                if(username.isEmpty()){
+                    throw new UsernameException(1);
+                }
+                else if (username.length() < 6) {
+                    throw new UsernameException(2);
+                }
+                else {
+                    user.setUsername(username);
+                    break;
+                }
+            }
+            catch (UsernameException e) {
+                System.out.println(e.getErrMessage());
+            }
+        }
+
+        while (true) {
+            try {
+                System.out.println("Email: ");
+                String email = scan.nextLine();
+                if (email.isEmpty()) {
+                    throw new EmailException(1);
+                } else if (!(email.contains("@ukdw.com"))) {
+                    throw new EmailException(2);
+                } else {
+                    user.setEmail(email);
+                    break;
+                }
+            }
+            catch (EmailException e) {
+                System.out.println(e.getErrMessage());
+            }
+        }
+
+        while (true) {
+            try {
+                boolean flagKecil = false;
+                boolean flagBesar = false;
+                boolean flagSimbol = false;
+                boolean flagAngka = false;
+
+                System.out.println("Password: ");
+                String password = scan.nextLine();
+
+                for (int i = 0; i<password.length();i++){
+                    char c = password.charAt(i);
+                    if(Character.isLetter(c) && Character.isLowerCase(c)){
+                        flagKecil = true;
+                    }
+                    if(Character.isLetter(c) && Character.isUpperCase(c)){
+                        flagBesar = true;
+                    }
+                    if(Character.isDigit(c)){
+                        flagAngka = true;
+                    }
+                }
+
+                Pattern pattern = Pattern.compile ("[!@#$%&*()_+=|<>?{}\\[\\]~-]");
+                Matcher match = pattern.matcher(password);
+                boolean check = match.find();
+
+                if (check)
+                    flagSimbol = true;
+
+                if (password.isEmpty()) {
+                    throw new PasswordException(1);
+                } else if (password.length() < 7) {
+                    throw new PasswordException(2);
+                } else if (password.equals(user.getUsername())) {
+                    throw new PasswordException(3);
+                } else if (!(flagKecil && flagBesar && flagSimbol && flagAngka)) {
+                    throw new PasswordException(4);
+                } else {
+                    user.setPassword(password);
+                    while(true){
+                        System.out.println("Konfirmasi Password: ");
+                        String password2 = scan.nextLine();
+                        if (!(password2.equals(user.getPassword()))){
+                            throw new PasswordException(5);
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            catch (PasswordException e) {
+                System.out.println(e.getErrMessage());
+            }
+        }
+        System.out.println( "Akun kamu berhasil didaftarkan!" );
+        System.out.println( "Silahkan login untuk melanjutkan." );
+
+        while (true) {
+            try {
+                System.out.println( "Username: " );
+                String username = scan.nextLine();
+                System.out.println( "Password: " );
+                String password = scan.nextLine();
+                if (username.isEmpty() || password.isEmpty()){
+                    throw new LoginException(1);
+                }
+                else if(!(username.equals(user.getUsername()) && password.equals(user.getPassword()))){
+                    throw new LoginException(2);
+                }
+
+                else {
+                    System.out.println( "Selamat datang, " + user.getUsername());
+                    break;
+                }
+            }
+            catch (LoginException e) {
+                System.out.println(e.getErrMessage());
+            }
+
+        }
+
+
+    }
+}
+EmailException.java-----------------------------------------
+package com.ug10.loginregister;
+
+public class EmailException extends Throwable {
+    private int errCode;
+    private String errMessage;
+
+    public EmailException(int errCode) {
+        if (errCode == 1) {
+            this.errMessage = "Maaf, email tidak boleh kosong!";
+        }
+        else if (errCode == 2) {
+            this.errMessage = "Maaf, email tidak valid!";
+        }
+    }
+
+    public EmailException(String errMessage){
+        super(errMessage);
+    }
+
+    public int getErrCode() {
+        return this.errCode;
+    }
+
+    public String getErrMessage() {
+        return this.errMessage;
+    }
+}
+LoginException----------------------------
+package com.ug10.loginregister;
+
+public class LoginException extends Throwable {
+    private int errCode;
+    private String errMessage;
+
+    public LoginException(int errCode) {
+        if (errCode == 1) {
+            this.errMessage = "Maaf, username atau password tidak boleh kosong!";
+        }
+        else if (errCode == 2) {
+            this.errMessage = "Maaf, username atau password salah! Silahkan coba lagi!";
+        }
+    }
+
+    public LoginException(String errMessage){
+        super(errMessage);
+    }
+
+    public int getErrCode() {
+        return this.errCode;
+    }
+
+    public String getErrMessage() {
+        return this.errMessage;
+    }
+}
+-PasswordException------------------------------
+package com.ug10.loginregister;
+
+public class PasswordException extends Throwable {
+    private int errCode;
+    private String errMessage;
+
+    public PasswordException(int errCode) {
+        if (errCode == 1) {
+            this.errMessage = "Maaf, password tidak boleh kosong!";
+        }
+        else if (errCode == 2) {
+            this.errMessage = "Maaf, password minimal terdiri dari 7 karakter";
+        }
+        else if (errCode == 3) {
+            this.errMessage = "Maaf, password tidak boleh sama dengan username!";
+        }
+        else if (errCode == 4) {
+            this.errMessage = "Maaf, password harus mengandung huruf besar, huruf kecil, simbol, dan angka!";
+        }
+        else if (errCode == 5) {
+            this.errMessage = "Maaf, password harus sama!";
+        }
+    }
+
+    public PasswordException(String errMessage){
+        super(errMessage);
+    }
+
+    public int getErrCode() {
+        return this.errCode;
+    }
+
+    public String getErrMessage() {
+        return this.errMessage;
+    }
+}
+--------------------------------USER-----
+package com.ug10.loginregister;
+
+public class User {
+    private String username;
+    private String email;
+    private String password;
+
+    public User(String username, String email, String password) {
+        setUsername(username);
+        setEmail(email);
+        setPassword(password);
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+}
+EXCEPTION---------------------
+package com.ug10.loginregister;
+
+public class UsernameException extends Throwable {
+    private int errCode;
+    private String errMessage;
+
+    public UsernameException(int errCode) {
+        if (errCode == 1) {
+            this.errMessage = "Maaf, username tidak boleh kosong!";
+        }
+        else if (errCode == 2) {
+            this.errMessage = "Maaf, username minimal harus terdiri dari 6 karakter!";
+        }
+    }
+
+    public UsernameException(String errMessage){
+        super(errMessage);
+    }
+
+    public int getErrCode() {
+        return this.errCode;
+    }
+
+    public String getErrMessage() {
+        return this.errMessage;
+    }
+}
