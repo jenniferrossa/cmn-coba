@@ -1,0 +1,309 @@
+-----------app---------------
+package com.rplbo.mycomputer;
+
+/**
+ * Hello world!
+ *
+ */
+public class App 
+{
+    public static void main( String[] args )
+    {
+        int SDCardSize = 10;
+        int SSDSize = 100;
+        Storage SDCard = new Storage(SDCardSize);
+        Storage SSD = new Storage(SSDSize);
+        CableData vivan = new CableData();
+        CableData robot = new CableData();
+        Smartphone smartphone = new Smartphone(SDCard, new TouchScreen());
+        Laptop laptop = new Laptop(SSD, new Monitor(), new Keyboard());
+        {
+            System.out.println("======TEST 1=======");
+            System.out.println("Ukuran storage smartphone\t: " +
+                    checkBenar(smartphone.getStorage().getSizeOfData() == SDCardSize));
+            System.out.println("Ukuran storage laptop \t\t: " +
+                    checkBenar(laptop.getStorage().getSizeOfData() == SSDSize));
+        }
+        int i = 0;
+        int j = 0;
+        {
+            System.out.println("======TEST 2=======");
+            String checkDataSmartphone = "";
+            String data = "Test String Data";
+            for (; i < 5; i++){
+                smartphone.retrieveData(i);
+                checkDataSmartphone =
+                        checkBenar(smartphone.getStorage().getData(i).equals(String.valueOf(i)));
+            }
+            smartphone.retrieveData(data);
+            String checkDataLaptop = "";
+            for (; j < 50; j++){
+                laptop.retrieveData(j);
+                checkDataLaptop =
+                        checkBenar(laptop.getStorage().getData(j).equals(String.valueOf((double)j)));
+            }
+            laptop.retrieveData(data);
+            System.out.println("Input data int smartphone\t: " +
+                    checkDataSmartphone);
+            System.out.println("Input data double laptop\t: " + checkDataLaptop);
+            System.out.println("Input data string smartphone: " +
+                    checkBenar(smartphone.getStorage().getData(i).equals(data)));
+            System.out.println("Input data string laptop\t: " +
+                    checkBenar(laptop.getStorage().getData(j).equals(data)));
+        }
+        {
+            System.out.println("======TEST 3=======");
+            boolean isSmartphoneSuccess = smartphone.attachCableData(vivan) && vivan.getComputer1() == smartphone;
+            boolean isLaptopSuccess = laptop.attachCableData(vivan) &&
+                    vivan.getComputer2() == laptop;
+            boolean isFailed = !laptop.attachCableData(robot);
+            boolean isFailed2 = robot.getComputer1() != laptop;
+            System.out.println("Attach cable smartphone\t: " +
+                    checkBenar(isSmartphoneSuccess));
+            System.out.println("Attach cable laptop\t\t: " +
+                    checkBenar(isLaptopSuccess));
+            System.out.println("Attach cable failed\t\t: " +
+                    checkBenar(isFailed));
+            System.out.println("Attach cable failed2\t: " +
+                    checkBenar(isFailed2));
+        }
+        {
+            System.out.println("======TEST 4=======");
+            String sendData = "SendData";
+            System.out.println("Send data smartphone\t: " +
+                    checkBenar(smartphone.sendData(sendData)));
+            System.out.println("Send data laptop\t\t: " +
+                    checkBenar(laptop.sendData(sendData)));
+            System.out.println("Send data success1\t\t: " +
+                    checkBenar(smartphone.getStorage().getData(++i).equals(sendData)));
+            System.out.println("Send data success2\t\t: " +
+                    checkBenar(laptop.getStorage().getData(++j).equals(sendData)));
+        }
+        {
+            System.out.println("======TEST 5=======");
+            System.out.println("Detach cable smartphone\t: " +
+                    checkBenar(smartphone.detachCableData()));
+            System.out.println("Detach cable success\t: " +
+                    checkBenar(!laptop.sendData("Harusnya gagal")));
+        }
+        {
+            System.out.println("======TEST 6=======");
+            try{
+                smartphone.showDisplay();
+                laptop.showDisplay();
+                System.out.println("Show data BENAR");
+            }catch (Exception e){
+                System.out.println("Show data SALAH");
+            }
+        }
+    }
+    public static String checkBenar(boolean check){
+        return check? "BENAR" : "SALAH";
+    }
+}
+--------------CableData.java----------------
+package com.rplbo.mycomputer;
+
+public class CableData {
+    private Computer computer1;
+    private Computer computer2;
+
+    public Computer getComputer1() {
+        return computer1;
+    }
+
+    public Computer getComputer2() {
+        return computer2;
+    }
+
+    public boolean attach(Computer pc){
+        if (this.computer1 == null){
+            this.computer1 = pc;
+            return true;
+        }
+        else if (this.computer2 == null){
+            this.computer2 = pc;
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    public boolean detach(Computer pc){
+        int idTarget = pc.getID();
+        if (this.computer1.getID() == idTarget){
+            this.computer1 = null;
+            return true;
+        }
+        else if (this.computer2.getID() == idTarget){
+            this.computer2 = null;
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    public boolean sendData(Computer targetPC, String data){
+        targetPC.retrieveData(data);
+        return true;
+    }
+}
+
+---------------------------------------------
+package com.rplbo.mycomputer;
+
+public class Computer {
+    private int ID;
+    private static int GlobalID = 1;
+    private CableData cableData;
+    Storage storage;
+
+    public Computer(Storage storage){
+        this.storage = storage;
+        this.ID = GlobalID;
+        GlobalID++;
+    }
+
+    public Storage getStorage(){
+        return storage;
+    }
+
+    public int getID() {
+        return ID;
+    }
+
+    public CableData getCableData() {
+        return cableData;
+    }
+    public boolean detachCableData(){
+        if (this.cableData == null){
+            return false;
+        }
+        this.cableData = null;
+        return true;
+    }
+    public boolean attachCableData(CableData kabel){
+        if (this.cableData!=null){
+           return false;
+        }
+        this.cableData = kabel;
+        return true;
+    }
+    public boolean sendData(String data){
+        if (cableData.getComputer1() == null){
+            return false;
+        }
+        else if (cableData.getComputer2() == null){
+            return false;
+        }
+        else {
+            if (cableData.getComputer1().getID() == this.getID()){
+                cableData.sendData(cableData.getComputer2(),  data);
+                return true;
+            }
+            else if(cableData.getComputer2().getID() == this.getID()){
+                cableData.sendData(cableData.getComputer1(),  data);
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+
+    }
+    public void retrieveData(String data){
+        getStorage().addData(data);
+    }
+}
+-------------
+package com.rplbo.mycomputer;
+
+public class Keyboard {
+    private String key;
+}
+---------------------------
+package com.rplbo.mycomputer;
+
+public class Laptop extends Computer {
+    Keyboard keyboard;
+    Monitor monitor;
+
+    public Laptop(Storage storage, Monitor monitor, Keyboard keyboard) {
+        super(storage);
+        this.keyboard = keyboard;
+        this.monitor = monitor;
+    }
+
+    public void showDisplay() {
+        this.monitor.display(this.storage);
+    }
+    public void retrieveData(double data){
+        getStorage().addData(String.valueOf(data));
+    }
+}
+----------------------------------
+package com.rplbo.mycomputer;
+
+public class Monitor {
+    public void display(Storage storage){
+        storage.toString();
+    }
+}
+-----------------------------
+package com.rplbo.mycomputer;
+
+public class Smartphone extends Computer{
+    TouchScreen touchScreen;
+    public Smartphone(Storage storage, TouchScreen touchScreen){
+        super(storage);
+        this.touchScreen = touchScreen;
+    }
+    public void showDisplay(){
+        this.touchScreen.display(this.storage);
+    }
+    public void retrieveData(int data) {
+        getStorage().addData(String.valueOf(data));
+    }
+}
+--------------------------------
+package com.rplbo.mycomputer;
+
+public class Storage {
+    private String[] storage;
+    public Storage(int ukuran){
+        this.storage = new String[ukuran];
+    }
+    public String getData(int index){
+        if (this.storage[index] == null){
+            return String.valueOf(index);
+        }
+        return this.storage[index];
+    }
+    public int getSizeOfData(){
+        return storage.length;
+    }
+    public boolean addData(String data){
+        for (int i = 0; i <storage.length; i ++)
+            if (storage[i] == null){
+                storage[i] = data;
+                return true;
+            }
+        return false;
+    }
+
+    public String toString(){
+        for (int i = 0; i <storage.length; i ++){
+            System.out.println(i+" : "+storage[i]);
+        }
+        return "Berhasil";
+    }
+}
+
+-----------------
+package com.rplbo.mycomputer;
+
+public class TouchScreen {
+    public void display(Storage storage){
+        storage.toString();
+    }
+}
