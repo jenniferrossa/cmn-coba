@@ -1,3 +1,4 @@
+/**app.java
 package com.ug9.mobilelegend;
 
 /**
@@ -66,3 +67,259 @@ public class App
         System.out.println("---> Health\t: "+ch.getHealth());
     }
 }
+CHARACTER-----------------------------------------------------------------------
+package com.ug9.mobilelegend;
+
+public abstract class Character {
+    private String name;
+    private int damage;
+    private int health;
+    private boolean isDie = false;
+
+    public String getName() {
+        return name;
+    }
+
+    public int getDamage() {
+        return damage;
+    }
+
+    public int getHealth() {
+        if(this.health <=0) {
+            this.health = 0;
+        }
+        return health;
+
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public boolean isDie() {
+        return isDie;
+    }
+
+    public void setDie(boolean die) {
+        isDie = die;
+    }
+
+    public Character(String name, int damage, int health) {
+        this.name = name;
+        this.damage = damage;
+        this.health = health;
+    }
+
+    public abstract void attack(Character enemy);
+
+    public void setDamage(int damage) {
+        this.damage = damage;
+    }
+
+    public void attackInformation(Character enemy, int damage){
+        System.out.print(this.name+" memberikan serangan ke ");
+        if (enemy instanceof Ranged || enemy instanceof Melee){
+            System.out.print("hero "+enemy.getName());
+        } else if (enemy instanceof Creep){
+            System.out.print("creep "+enemy.getName());
+        } else if (enemy instanceof Minion){
+            System.out.print("minion "+enemy.getName());
+        }
+        System.out.println(" sebesar "+damage);
+    }
+}
+CREEP------------------------------------------------------
+package com.ug9.mobilelegend;
+
+public class Creep extends NPC{
+    public Creep(String name, int damage, int health) {
+        super(name, damage, health);
+    }
+
+    @Override
+    public void attack(Character enemy) {
+
+        if (enemy instanceof Creep || enemy instanceof Minion){
+            System.out.println("Terjadi kesalahan! Creep tidak dapat menyerang minion maupun creep lainnya.");
+        }
+        else {
+            super.attack(enemy);
+
+        }
+    }
+}
+HERO---------------------------------------------------------
+package com.ug9.mobilelegend;
+
+public abstract class Hero extends Character{
+    private int healthBonus;
+    private int level=1;
+    private int healthMax=this.getHealth();
+    private int lifeSteal=50;
+
+    public Hero(String name, int damage, int health) {
+        super(name, damage, health);
+    }
+
+    public void addDamage(int damage){
+        System.out.println(getName()+" mengaktifkan ulti. Damage saat ini bertambah " + damage);
+        int dmg = damage + getDamage();
+         setDamage(dmg);
+
+    }
+
+    @Override
+    public void attack(Character enemy) {
+
+        if(enemy.getHealth() <=0){
+            enemy.setHealth(0);
+            enemy.setDie(true);
+        }
+        if(enemy.isDie()){
+            level+=1;
+            if (enemy instanceof Ranged || enemy instanceof Melee){
+                lifeSteal+=150;
+                int lsteal = getHealth() + lifeSteal;
+                this.setHealth(lsteal);
+
+            }
+            else if (enemy instanceof Minion || enemy instanceof Creep){
+                healthBonus += 1;
+                int lsteal = getHealth() + lifeSteal;
+                this.setHealth(lsteal);
+
+            }
+
+        }
+        int dmg = getDamage() ;
+        int enemhealth = enemy.getHealth();
+        enemy.setHealth(enemhealth + healthBonus - dmg);
+
+    }
+
+
+    public void setHealthBonus(int healthBonus) {
+        this.healthBonus = healthBonus;
+
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    @Override
+    public void attackInformation(Character enemy, int damage) {
+        super.attackInformation(enemy, damage);
+    }
+
+    }
+MALE------------------------------------------------
+package com.ug9.mobilelegend;
+
+public class Melee extends Hero implements Skill{
+    public Melee(String name, int damage, int health) {
+        super(name, damage, health);
+    }
+
+    @Override
+    public void ultimate() {
+        addDamage(100);
+
+    }
+
+    @Override
+    public void attack(Character enemy) {
+        super.attack(enemy);
+        if (enemy instanceof Creep){
+            setHealthBonus(200);
+            super.attack(enemy);
+        }
+
+        System.out.println(getName()+" memberikan serangan ke "+enemy.getName()+" sebesar " + getDamage());
+    }
+
+}
+MINION------------------------------------
+package com.ug9.mobilelegend;
+
+public class Minion extends NPC{
+    public Minion(String name, int damage, int health) {
+        super(name, damage, health);
+    }
+
+    @Override
+    public void attack(Character enemy) {
+
+        if (enemy instanceof Creep){
+            System.out.println("Terjadi kesalahan! Minion tidak dapat menyerang Creep.");
+        } else {
+            super.attack(enemy);
+
+
+        }
+    }
+}
+NPC-------------------------------------
+package com.ug9.mobilelegend;
+
+public class NPC extends Character{
+    public NPC(String name, int damage, int health) {
+        super(name, damage, health);
+    }
+
+    @Override
+    public void attack(Character enemy) {
+        if(enemy.getHealth() <=0){
+            enemy.setHealth(0);
+            enemy.setDie(true);
+        }
+        if (enemy instanceof Ranged || enemy instanceof Melee){
+            int dmg = getDamage() + 100;
+            int enemhealth = enemy.getHealth();
+            enemy.setHealth(enemhealth - dmg);
+
+
+            System.out.println(getName() + " memberikan serangan ke " +enemy.getName() +" sebesar " + dmg);
+
+        }
+
+    }
+
+
+    @Override
+    public void attackInformation(Character enemy, int damage) {
+        super.attackInformation(enemy, damage);
+
+    }
+}
+RANGED------------------------------
+package com.ug9.mobilelegend;
+
+public class Ranged extends Hero implements Skill{
+    public Ranged(String name, int damage, int health) {
+        super(name, damage, health);
+    }
+
+    @Override
+    public void ultimate() {
+        addDamage(150);
+    }
+
+    @Override
+    public void attack(Character enemy) {
+        super.attack(enemy);
+        if (enemy instanceof Creep){
+            setHealthBonus(150);
+        }
+        System.out.println(getName()+" memberikan serangan ke "+enemy.getName()+" sebesar " + getDamage());
+    }
+}
+SKIL------------------------------------------------------------
+package com.ug9.mobilelegend;
+
+interface Skill {
+    public void ultimate();
+}
+
+
+
